@@ -1,4 +1,5 @@
 ## Nota: esto no se ejecutó en pySpark local, fue ejecutado en AWS Glue Script Editor
+
 import sys
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
@@ -30,12 +31,12 @@ dyf_products = glueContext.create_dynamic_frame.from_catalog(
     table_name="novashop_products_csv"
 )
 
-# 2. Convertimos a DataFrames
+# Convertimos a DataFrames
 df_sales = dyf_sales.toDF()
 df_products = dyf_products.toDF().withColumnRenamed("unit_price", "unit_price_catalog")
 
 ## "T" Transform
-# 3. Join nativo (Usando Data Frames y no Dynamic Frames)
+# Join nativo (Usando Data Frames y no Dynamic Frames)
 df_join_sales_products = df_sales.join(
     df_products, 
     df_sales["product_id"] == df_products["product_id"], 
@@ -55,12 +56,11 @@ with_metrics = df_join_sales_products.withColumn("subtotal", col("qty") * col("u
 
 dyf_output = DynamicFrame.fromDF(with_metrics, glueContext, "dyf_output")
 
-# 2. Escribimos en S3
 glueContext.write_dynamic_frame.from_options(
     frame = dyf_output,
     connection_type = "s3",
     connection_options = {
-        "path": "s3://group-one-project-uh/practices_group/novashop-curated/"
+        "path": "s3://group-one-project-uh/practices_group/novashop/curated/"
     },
     format = "parquet"
 )
