@@ -22,13 +22,13 @@ job.init(args['JOB_NAME'], args)
 ## "E" Extract
 
 dyf_sales = glueContext.create_dynamic_frame.from_catalog(
-    database="practice-database-group-one", 
-    table_name="novashop_sales_csv"
+    database="novashop_db_one", 
+    table_name="raw_novashop_sales_csv"
 )
 
 dyf_products = glueContext.create_dynamic_frame.from_catalog(
-    database="practice-database-group-one", 
-    table_name="novashop_products_csv"
+    database="novashop_db_one", 
+    table_name="raw_novashop_products_csv"
 )
 
 # Convertimos a DataFrames

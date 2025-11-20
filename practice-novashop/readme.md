@@ -1,89 +1,98 @@
+# Práctica Novashop: Pipeline ETL con AWS Glue y Athena
 
-# Ejercicio Novashop
-Objetivo: Usar un Crawler de AWS Glue para catalogar dos archivos CSV (productos y ventas), crear un Job de ETL (PySpark) que 
-genere una sola tabla en formato Parquet y consultar con Athena para responder 10 preguntas de analítica.
+## Objetivo
 
+Implementar un flujo de datos (Pipeline ETL) utilizando servicios de AWS para procesar información de ventas y productos. El objetivo es catalogar archivos CSV crudos, transformarlos y unificarlos usando AWS Glue (PySpark) para generar una tabla optimizada en formato Parquet, y finalmente realizar análisis de negocio mediante consultas en AWS Athena.
 
-## Pasos seguidos
+## Arquitectura de Datos
+Los datos se organizan en Amazon S3 bajo la siguiente estructura:
 
-### Creación de Crawlers
+- **Raw Data:** *s3://group-one-project-uh/practices_group/novashop/raw/* (Archivos CSV originales).
 
-Utilizando la consola de Glue, creamos un **crawler** llamado *group-one-novashop* que cataloga la estructura de los *-csv*
-dentro del **URI:***s3://group-one-project-uh/practices_group/Novashop/*
+- **Curated Data:** *s3://group-one-project-uh/practices_group/novashop/curated/* (Datos procesados en Parquet).
 
-### Consultas de prueba
+## Ingesta y Catalogación (Raw Zone)
 
-Realizamos las siguientes consultas de prueba, ninguna brindó resultados, por lo que programamos un Job (Visual ETL) para la ingesta de datos a los catálogos.
+#### Creación de Crawlers
 
-```sql
-    SELECT * FROM "practice-database-group-one"."novashop_products_csv" limit 10;
-```
+Utilizando la consola de AWS Glue, se creó el crawler **group-one-novashop** para catalogar la estructura de los archivos *.csv* ubicados en la ruta raw.
 
-```sql
-    SELECT * FROM "practice-database-group-one"."novashop_sales_csv" limit 10;
-```
+#### Validación y Ajuste de Ingesta (Visual ETL)
 
-### Ingesta a tablas originales (Job Visual)
-
-Creamos un Job, utilizanod la consola visual para extraer de **S3** e insertar en la tabla de **Glue Data Catalog**, el Job creado se llama *group-one-novashop*
-
-Una vez creado el Job y concluido ahora si vemos datos en las tablas y creamos el siguiente Join:
+Inicialmente, tras ejecutar el crawler, las consultas en Athena no devolvieron resultados (tablas vacías).
 
 ```sql
-    SELECT
-        A.*,
-        B.*
-    FROM "practice-database-group-one"."novashop_sales_csv" AS A
-    LEFT JOIN "practice-database-group-one"."novashop_products_csv" AS B
-    ON A.product_id = B.product_id
+SELECT * FROM "novashop_db_one"."raw_novashop_products_csv" limit 10;
+SELECT * FROM "novashop_db_one"."raw_novashop_sales_csv" limit 10;
 ```
 
-# Entendiendo Spark
+**Solución:** Para garantizar la disponibilidad de los datos en el Glue Data Catalog, se implementó un Job Visual llamado **group-one-novashop**. Este trabajo extrae los datos explícitamente de S3 y los inserta en las tablas del catálogo.
 
-Investigando como funciona Spark, vimos que en **AWS Clue Studio** la función de crear un **ETL** utilizando **Spark** con el *Script editor*.
+Tras la ejecución exitosa del Job, se validó la integridad de los datos mediante un JOIN de prueba:
 
-Una vez abierto, nos muestra esta estructura:
+```sql
+SELECT
+    A.*,
+    B.*
+FROM "novashop_db_one"."raw_novashop_sales_csv" AS A
+LEFT JOIN "novashop_db_one"."raw_novashop_products_csv" AS B
+ON A.product_id = B.product_id
+```
+
+## Transformación con PySpark (Script Editor)
+
+Para la fase de transformación y curación de datos, se optó por utilizar el Script Editor de AWS Glue Studio con Spark.
+
+#### Estructura del Script
+El script sigue las mejores prácticas de AWS Glue, encapsulando la lógica de transformación entre la inicialización y la confirmación del Job.
 
 ```python
-    import sys
-    from awsglue.transforms import *
-    from awsglue.utils import getResolvedOptions
-    from pyspark.context import SparkContext
-    from awsglue.context import GlueContext
-    from awsglue.job import Job
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
 
-    ## @params: [JOB_NAME]
-    args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+## @params: [JOB_NAME]
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
-    sc = SparkContext()
-    glueContext = GlueContext(sc)
-    spark = glueContext.spark_session
-    job = Job(glueContext)
-    job.init(args['JOB_NAME'], args)
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
 
+## NOTA: Para que Glue procese correctamente el código y mantenga el estado,
+## una buena práctica es colocar toda la lógica ETL entre job.init() y job.commit()
 
-    ## Para que Glue procese correctamente el código 
-    ## una buena práctica es siempre colocar todo el ETL
-    ## entre el job.init() y el job.commit()
-    job.commit()
+# ... [Lógica de extracción, Join, cálculos y escritura a Parquet] ...
+
+job.commit()
 ```
 
-Esto es una versión enriquecida de pySpark iuntegrada en Glue, una de las anotaciones mas importantes es el comentario que colocamos dentro del segmento de código anterior, *Para que Glue procese correctamente el código una buena práctica es siempre colocar todo el ETL entre el job.init() y el job.commit()*
+#### Ejecución y Depuración
 
-El código de Spark completo con la extracción de los CSV se almacena entre los adjuntos en el repositorio, las transformaciones (JOINs y Métricas calculadas) y el sink de data curada en formato *.parquet*
+Durante el desarrollo del script PySpark se realizaron varias iteraciones para ajustar las transformaciones (Joins y métricas calculadas) y asegurar la escritura correcta en formato .parquet particionado.
 
-Aquí la evidencia de las pruebas y errores que estuvimos ejecutando y haciendo ajustes entendiendo el código:
-![alt text](../images/novashop_runs_pyspark_script.png)
+![alt text](..\images\novashop_runs_pyspark_script.png)
 
+## Capa Curada y Analítica (Curated Zone)
 
-# Entregable - Capturas de Generales
+Una vez generado el archivo unificado en formato Parquet en la ruta s3://.../novashop/curated/, se procedió a disponibilizar esta tabla para análisis.
 
-Una vez ya ejecutado el pySpark, repetimos el proceso de crear un Crawler en la ruta donde se encuentran nuestros *.parquet*, en este caso no hubo inconvenientes y automaticmaente se cargaron los datos en el catálogo y pudimos efectuar las consultas requeridas para la práctica utilizando **AWS Athena**
+#### Definición de Tabla en Athena
+Se creó la tabla externa novashop_db.sales_curated apuntando a los datos procesados.
 
+```sql
 
-Ademas, se adjunta captura de la base de datos donde se observan las tablas originales y la unión creada:
+```
 
-![alt text](../images/novashop_database.png)
+#### Evidencia de Base de Datos
+En la siguiente captura se observan las tablas originales (csv) y la tabla final unificada (curated).
+
+#### Resultados del Análisis de Negocio
+A continuación, se presentan las consultas SQL realizadas en AWS Athena para responder a las preguntas de negocio planteadas.
 
 1) Ventas totales y margen bruto (suma de total y de profit) del periodo
 
@@ -112,5 +121,5 @@ Ademas, se adjunta captura de la base de datos donde se observan las tablas orig
 9) Clientes únicos y tasa de recompra (clientes con más de 1 orden)
 
 
-10) Descuento total aplicado y su efecto en el margen (profit/ventas por nivel de
-descuento)
+10) Descuento total aplicado y su efecto en el margen (profit/ventas por nivel de descuento)
+
