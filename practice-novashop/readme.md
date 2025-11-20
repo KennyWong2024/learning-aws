@@ -75,7 +75,7 @@ job.commit()
 
 Durante el desarrollo del script PySpark se realizaron varias iteraciones para ajustar las transformaciones (Joins y métricas calculadas) y asegurar la escritura correcta en formato .parquet particionado.
 
-![alt text](\images\novashop_runs_pyspark_script.png)
+![alt text](..\images\novashop_runs_pyspark_script.png)
 
 ## Capa Curada y Analítica (Curated Zone)
 

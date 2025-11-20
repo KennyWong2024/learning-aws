@@ -60,7 +60,8 @@ glueContext.write_dynamic_frame.from_options(
     frame = dyf_output,
     connection_type = "s3",
     connection_options = {
-        "path": "s3://group-one-project-uh/practices_group/novashop/curated/"
+        "path": "s3://group-one-project-uh/practices_group/novashop/curated/",
+        "partitionKeys": ["year", "month"]
     },
     format = "parquet"
 )
