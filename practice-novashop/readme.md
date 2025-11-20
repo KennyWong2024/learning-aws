@@ -129,30 +129,40 @@ A continuación, se presentan las consultas SQL realizadas en AWS Athena para re
 
 1) Ventas totales y margen bruto (suma de total y de profit) del periodo
 
+![alt text](..\images\novashop_query_01.png)
 
 2) Ticket promedio (promedio de total por orden)
 
+![alt text](..\images\novashop_query_02.png)
 
 3) Top 5 categorías por ventas.
 
+![alt text](..\images\novashop_query_03.png)
 
 4) Tendencia mensual de ventas y margen
 
+![alt text](..\images\novashop_query_04.png)
 
 5) Ciudades con mejor rendimiento por ventas
 
+![alt text](..\images\novashop_query_05.png)
 
 6) Marca con mayor contribución a la utilidad
 
+![alt text](..\images\novashop_query_06.png)
 
 7) Método de pago: distribución de ventas y conteo de órdenes
 
+![alt text](..\images\novashop_query_07.png)
 
 8) Canal (Tienda vs Online): comparación de ventas, utilidad y ticket promedio
 
+![alt text](..\images\novashop_query_08.png)
 
 9) Clientes únicos y tasa de recompra (clientes con más de 1 orden)
 
+![alt text](..\images\novashop_query_09.png)
 
 10) Descuento total aplicado y su efecto en el margen (profit/ventas por nivel de descuento)
 
+![alt text](..\images\novashop_query_10.png)
