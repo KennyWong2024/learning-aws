@@ -85,8 +85,41 @@ Una vez generado el archivo unificado en formato Parquet en la ruta s3://.../nov
 Se creó la tabla externa novashop_db.sales_curated apuntando a los datos procesados.
 
 ```sql
-
+CREATE EXTERNAL TABLE IF NOT EXISTS sales_curated (
+  order_id bigint,
+  order_date string,
+  store_id string,
+  city string,
+  customer_id bigint,
+  product_id bigint,
+  qty int,
+  unit_price double,
+  discount_pct double,
+  payment_method string,
+  channel string,
+  product_name string,
+  category string,
+  brand string,
+  unit_price_catalog double,
+  unit_cost double,
+  subtotal double,
+  discount_amount double,
+  total double,
+  cogs double,
+  profit double
+)
+PARTITIONED BY (year int, month int)
+STORED AS PARQUET
+LOCATION 's3://group-one-project-uh/practices_group/novashop/curated/'
+TBLPROPERTIES ('parquet.compression'='SNAPPY');
 ```
+
+Luego es necesario ejecutar lo siguiente
+```sql
+MSCK REPAIR TABLE sales_curated
+```
+
+Fuente de guia para DDL: https://repost.aws/es/knowledge-center/athena-create-use-partitioned-tables
 
 #### Evidencia de Base de Datos
 En la siguiente captura se observan las tablas originales (csv) y la tabla final unificada (curated).
