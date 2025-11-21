@@ -166,3 +166,13 @@ A continuación, se presentan las consultas SQL realizadas en AWS Athena para re
 10) Descuento total aplicado y su efecto en el margen (profit/ventas por nivel de descuento)
 
 ![alt text](../images/novashop_query_10.png)
+
+
+## Automatización de Proceso (Orquestación)
+
+Una vez que tenemos todos nuestros procesos, los llamamos desde el orquestador de AWS Glue, quien se va a asegurar que cada proceso se ejecute respetando sus dependencias, 
+para nuestro caso trabajamos con un cron que emula una programación en distintas horas entre semana para actulización de datos de ventas y configuramos nuestro flujo 
+de trabajo como el que se observa en la imagen:
+
+![alt text](../images/novashop_orquetration.png)
+
