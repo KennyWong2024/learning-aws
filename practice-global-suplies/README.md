@@ -105,56 +105,112 @@ REGION AS 'us-east-2';
 1 ¿Qué empleado tiene más movimientos 
 registrados? 
 ```sql
-
+SELECT
+    id_empleado,
+    COUNT(1) AS cantidad_movimientos
+FROM
+    "group_one"."global_supplies"."movimientos"
+GROUP BY 1
+ORDER BY 2 DESC
 ```
 
 2 ¿Qué producto fue movido más veces? 
 ```sql
-
+SELECT 
+    id_producto, 
+    COUNT(1) AS total_movido
+FROM "group_one"."global_supplies"."movimientos"
+GROUP BY 1
+ORDER BY 2 DESC
 ```
 
 3 ¿En qué día se registraron más 
 movimientos?
 ```sql
-
+SELECT 
+    CAST(fecha AS DATE) AS dia, 
+    COUNT(1) AS total
+FROM "group_one"."global_supplies"."movimientos"
+GROUP BY 1
+ORDER BY 2 DESC
 ```
 
 4 ¿Qué área tuvo la mayor cantidad total 
 movida?
 ```sql
-
+SELECT 
+    area, 
+    SUM(cantidad) AS total_movido
+FROM FROM "group_one"."global_supplies"."movimientos"
+GROUP BY 1
+ORDER BY 2 DESC
 ```
 
 5 ¿Qué turno tiene más empleados?
 ```sql
-
+SELECT 
+    turno, 
+    COUNT(id_empleado) AS cantidad
+FROM "group_one"."global_supplies"."empleados" 
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1
 ```
 
 6 ¿Qué país tiene más empleados? 
 ```sql
-
+SELECT 
+    pais, 
+    COUNT(id_empleado) AS cantidad
+FROM "group_one"."global_supplies"."empleados" 
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1
 ```
 
 7 ¿Qué tipo de producto es más frecuente 
 en inventario?
 ```sql
-
+SELECT
+    tipo_producto,
+    COUNT(1) AS total_productos
+FROM  "group_one"."global_supplies"."productos"
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1
 ```
 
 8 ¿Qué supervisor tiene más áreas 
 asignadas?
 ```sql
-
+SELECT
+    supervisor,
+    COUNT(area) AS total_areas_asignadas
+FROM "group_one"."global_supplies"."areas" 
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1
 ```
 
 9 ¿Qué empleados han movido más de 
 10 productos en total?
 ```sql
-
+SELECT 
+    id_empleado, 
+    SUM(cantidad) AS total_movido
+FROM "group_one"."global_supplies"."movimientos"
+GROUP BY 1
+HAVING SUM(cantidad) > 10
+ORDER BY 2 DESC
 ```
 
 10 ¿Qué hora tuvo más movimientos 
 registrados? 
 ```sql
-
+SELECT
+    DATEPART(HOUR, hora) AS hora_del_dia,
+    COUNT(1) AS total_movimientos
+FROM "group_one"."global_supplies"."movimientos"
+GROUP BY 1
+ORDER BY 2 DESC
 ```
