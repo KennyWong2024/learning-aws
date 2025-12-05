@@ -1,3 +1,5 @@
+# Método: Extracción desde Redshft (Copy)
+
 ## DDL Tablas
 DDL de las tablas en la que insertaremos la información utilizando **COPY** from *csv* desde **S3**
 
@@ -99,8 +101,65 @@ IGNOREHEADER 1
 REGION AS 'us-east-2';
 ```
 
+# Método: Glue (ETL)
+Este segundo método nos entrega el mismo resultado que el primero solo que utilizamos **Glue Catalog** para orquestar el *ETL*, esto con fines didacticos ya que el 
+volumen de datos es mínimo para el escenario.
 
-## Consultas Requeridas
+## Creación de Catálogo (Crawlers)
+Creamos un **Crawler** que catalogue los cuatro *.csv* en **Glue Catalog**
+
+![alt text](../images/global_suplies_01_crawler.png)
+
+## Desarrollo de ETL (Visual ETL)
+Una vez ya definidos los catálogos con los que vamos a trabajar desarrollamos el **Visual ETL**, para poner en práctica distintas funciones que ofrece la herramienta
+creamos un *EL* simple para cada tabla y ademas un *ETL* donde hacemos un **JOIN** de toda la información y lo depositamos a una *"obt"*.
+
+![alt text](../images/global_suplies_02_etl.png)
+
+## Ingesta de Data (Redshift)
+Tenemos primeramente que recrear las tablas en **Redshift** en un nuevo *schema* esto para mantener productivo el caso anterior en el que aprendimos el uso del **COPY** directo desde **Redshift**,
+para ello, simplemente ejecutaremos las querys DDL del inicio solo que cambiamos el *schema*, aparte creamos la tabla que almacenará la trasnformación que configuraremos en **AWS Glue**:
+
+```sql
+CREATE TABLE "group_one"."global_supplies_glue"."obt_movimientos" AS
+SELECT
+    E.id_empleado,
+    E.nombre AS nombre_empleado,
+    E.turno,
+    E.pais,
+    M.id_movimiento,
+    M.fecha,
+    M.hora,
+    M.cantidad,
+    A.area AS nombre_area,
+    A.supervisor,
+    P.id_producto,
+    P.nombre_producto,
+    P.tipo_producto
+FROM
+    "group_one"."global_supplies_glue"."movimientos" M
+RIGHT JOIN  
+    "group_one"."global_supplies_glue"."empleados" E
+    ON M.id_empleado = E.id_empleado
+LEFT JOIN  
+    "group_one"."global_supplies_glue"."areas" A
+    ON M.area = A.area
+LEFT JOIN  
+    "group_one"."global_supplies_glue"."productos" P
+    ON M.id_producto = P.id_producto
+```
+
+Verificamos la data en Redshift:
+![alt text](../images/global_suplies_03_redshift_result.png)
+
+## Orquestación de Pipeline
+Finalmente, para simular un ambiente productivo en el cual existe todo un proceso automatizado vamos a incluir nuestro **Crawler** y **Visual ETL** en una 
+*orquestación* que ejecute periodicamente este **ETL** de datos.
+
+![alt text](../images/global_suplies_04_orquestacion.png)
+
+# Consultas Requeridas
+Consultas solicitadas en el requerimiento del entregable de clase
 
 1 ¿Qué empleado tiene más movimientos 
 registrados? 
