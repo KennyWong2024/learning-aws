@@ -20,15 +20,18 @@ Creación de crawlers con el fin de crear los catálogos en glue y tenerlos list
 ![alt text](../images/project_03.png)
 
 ## Paso 3: Preparación de Redshift
-Creación de tablas
+Creación de tablas para data cruda, haremos un *ELT*, esto debido a que hay datos problematicos que primero queremos entender y probar apra dar tratamiento,
+aprovecharemos la potencia de **Redshift** para utilziarla como *Lakehouse*, no tenemos acceso por temas academicos a soluciones como **DBT** pero simularemos
+una orquestación de datos utilizando prefijos ordenados para entedner el proceso
 
+### Bronze Layer
 ```sql
-CREATE TABLE "group_one"."project"."sample_submission" (
+CREATE TABLE "group_one"."project_bronze"."raw_sample_submission" (
     id BIGINT,
     sales BIGINT
 );
 
-CREATE TABLE "group_one"."project"."store"(
+CREATE TABLE "group_one"."project_bronze"."raw_store"(
   store BIGINT, 
   storetype VARCHAR(100), 
   assortment VARCHAR(100), 
@@ -41,27 +44,28 @@ CREATE TABLE "group_one"."project"."store"(
   promointerval VARCHAR(100)
 );
 
-CREATE TABLE "group_one"."project"."test" (
+CREATE TABLE "group_one"."project_bronze"."raw_test" (
   id BIGINT, 
   store BIGINT, 
   dayofweek BIGINT, 
-  date VARCHAR(100), 
-  is_open  BIGINT, 
+  date DATE, 
+  is_open VARCHAR(50),
   promo BIGINT, 
-  stateholiday BIGINT, 
-  schoolholiday BIGINT
+  stateholiday VARCHAR(50),
+  schoolholiday VARCHAR(50) 
 );
 
-
-CREATE TABLE "group_one"."project"."train" (
+CREATE TABLE "group_one"."project_bronze"."raw_train" (
   store BIGINT, 
   dayofweek BIGINT, 
-  date VARCHAR(100), 
+  date DATE, 
   sales BIGINT, 
   customers BIGINT, 
-  is_open  BIGINT, 
+  is_open VARCHAR(50),
   promo BIGINT, 
-  stateholiday BIGINT, 
-  schoolholiday BIGINT
+  stateholiday VARCHAR(50),
+  schoolholiday VARCHAR(50)
 );
 ```
+
+Una vez definidos las tabals de destino mcargaremos la información mediante Glue utilziando Spark, el código de carga se encuentra en **project\glue\01. EL Job.py**
