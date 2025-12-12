@@ -23,20 +23,45 @@ Creación de crawlers con el fin de crear los catálogos en glue y tenerlos list
 Creación de tablas
 
 ```sql
-CREATE TABLE group_one.project.sample_submission (
-    id INT,
-    sales INT
-)
-```
+CREATE TABLE "group_one"."project"."sample_submission" (
+    id BIGINT,
+    sales BIGINT
+);
 
-```sql
+CREATE TABLE "group_one"."project"."store"(
+  store BIGINT, 
+  storetype VARCHAR(100), 
+  assortment VARCHAR(100), 
+  competitiondistance BIGINT, 
+  competitionopensincemonth BIGINT, 
+  competitionopensinceyear BIGINT, 
+  promo2 BIGINT, 
+  promo2sinceweek BIGINT, 
+  promo2sinceyear BIGINT, 
+  promointerval VARCHAR(100)
+);
 
-```
+CREATE TABLE "group_one"."project"."test" (
+  id BIGINT, 
+  store BIGINT, 
+  dayofweek BIGINT, 
+  date VARCHAR(100), 
+  is_open  BIGINT, 
+  promo BIGINT, 
+  stateholiday BIGINT, 
+  schoolholiday BIGINT
+);
 
-```sql
 
-```
-
-```sql
-
+CREATE TABLE "group_one"."project"."train" (
+  store BIGINT, 
+  dayofweek BIGINT, 
+  date VARCHAR(100), 
+  sales BIGINT, 
+  customers BIGINT, 
+  is_open  BIGINT, 
+  promo BIGINT, 
+  stateholiday BIGINT, 
+  schoolholiday BIGINT
+);
 ```
