@@ -18,3 +18,25 @@ Creación de crawlers con el fin de crear los catálogos en glue y tenerlos list
 
 - Validación en Athena
 ![alt text](../images/project_03.png)
+
+## Paso 3: Preparación de Redshift
+Creación de tablas
+
+```sql
+CREATE TABLE group_one.project.sample_submission (
+    id INT,
+    sales INT
+)
+```
+
+```sql
+
+```
+
+```sql
+
+```
+
+```sql
+
+```
