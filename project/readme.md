@@ -222,6 +222,10 @@ graph TD
 
 ---
 
+### Captura con ejecución exitosa
+
+![alt text](../images/project_retail_01.png)
+
 ## 🚧 Retos y Soluciones
 
 ### 1. Idempotencia del Pipeline
