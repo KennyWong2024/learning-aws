@@ -4,6 +4,8 @@ from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
+from awsglue.dynamicframe import DynamicFrame
+from pyspark.sql.functions import col, when
 
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
@@ -16,11 +18,11 @@ job.init(args['JOB_NAME'], args)
 ## Lectura de datos
 datasource0 = glueContext.create_dynamic_frame.from_catalog(
     database = "retail_grupo1", 
-    table_name = "raw_store_csv", 
+    table_name = "raw_store", 
     transformation_ctx = "datasource0"
 )
 
-## Transformacion, nombres snake_case
+## Transformaciones a snake_case
 applymapping1 = ApplyMapping.apply(
     frame = datasource0, 
     mappings = [
@@ -38,12 +40,19 @@ applymapping1 = ApplyMapping.apply(
     transformation_ctx = "applymapping1"
 )
 
-## Carga de datos en parquet
+spark_df = applymapping1.toDF()
+spark_df_clean = spark_df.withColumn("promo_interval", 
+    when(col("promo_interval") == "", None).otherwise(col("promo_interval"))
+)
+final_dynamic_frame = DynamicFrame.fromDF(spark_df_clean, glueContext, "final_dynamic_frame")
+
+
+## Carga de datos
 datasink2 = glueContext.write_dynamic_frame.from_options(
-    frame = applymapping1, 
+    frame = final_dynamic_frame, 
     connection_type = "s3", 
     connection_options = {
-        "path": "s3://group-one-project-uh/project/curated/store/"
+        "path": "s3://uh-retail-grupo1/curated/store/curated_store"
     }, 
     format = "parquet", 
     transformation_ctx = "datasink2"
