@@ -202,7 +202,7 @@ Gestiona automáticamente la ejecución secuencial y condicional de todas las ta
 
 ```mermaid
 graph TD
-    A[🎬 Trigger Manual] --> B[Crawler Raw]
+    A[🎬 Trigger Manual/Schedule] --> B[Crawler Raw]
     B -->|SUCCEEDED| C[Job 1: Limpieza]
     C -->|SUCCEEDED| D[Job 2: Dimensión]
     D -->|SUCCEEDED| E[Job 3: Hechos]
@@ -214,7 +214,7 @@ graph TD
 
 | Trigger | Condición | Siguiente Paso |
 |---------|-----------|----------------|
-| 🚀 Inicial | On Demand | Crawler Raw |
+| 🚀 Inicial | On Demand/Schedule | Crawler Raw |
 | ✅ Trigger 1 | Crawler Raw = SUCCEEDED | Job 1 (Limpieza) |
 | ✅ Trigger 2 | Job 1 = SUCCEEDED | Job 2 (Dimensión) |
 | ✅ Trigger 3 | Job 2 = SUCCEEDED | Job 3 (Hechos) |
