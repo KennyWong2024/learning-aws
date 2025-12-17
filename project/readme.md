@@ -222,7 +222,7 @@ graph TD
 
 ---
 
-### Captura con ejecución exitosa
+#### Captura con ejecución exitosa
 
 ![alt text](../images/project_retail_01.png)
 
