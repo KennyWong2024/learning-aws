@@ -281,6 +281,104 @@ raw/
 
 ---
 
+## 📈 Análisis de Negocio
+Una vez completado el pipeline ETL, los datos procesados están disponibles para responder preguntas estratégicas de negocio mediante consultas SQL en AWS Athena.
+
+- 1. 🏪 ¿Cuántas tiendas hay por StoreType y Assortment?
+
+```sql
+SELECT 
+    store_type, 
+    assortment, 
+    COUNT(store_id) as total_stores
+FROM "retail_grupo1"."curated_dim_store"
+GROUP BY store_type, assortment
+ORDER BY store_type, assortment;
+```
+
+- 2. 🎯 ¿Qué porcentaje de tiendas participa en Promo2?
+
+```sql
+SELECT 
+    COUNT(store_id) as total_stores,
+    SUM(promo2) as stores_with_promo2,
+    (CAST(SUM(promo2) AS DOUBLE) / COUNT(store_id)) * 100.0 as pct_participation
+FROM "retail_grupo1"."curated_dim_store";
+```
+
+- 3. 📍 ¿Cuál es la distancia promedio a la competencia por StoreType?
+
+```sql
+SELECT 
+    store_type,
+    ROUND(AVG(competition_distance), 2) as avg_distance_meters
+FROM "retail_grupo1"."curated_dim_store"
+WHERE competition_distance IS NOT NULL
+GROUP BY store_type
+ORDER BY avg_distance_meters ASC;
+```
+
+- 4. ⚠️ ¿Qué tiendas enfrentan mayor presión competitiva?
+
+```sql
+SELECT 
+    store_id, 
+    store_type, 
+    competition_distance
+FROM "retail_grupo1"."curated_dim_store"
+WHERE competition_distance IS NOT NULL 
+  AND competition_distance > 0
+ORDER BY competition_distance ASC
+LIMIT 20;
+```
+
+- 5. 📅 ¿Cómo se distribuyen las aperturas de competencia por año?
+
+```sql
+SELECT 
+    competition_open_since_year, 
+    COUNT(store_id) as new_competitors_count
+FROM "retail_grupo1"."curated_dim_store"
+WHERE competition_open_since_year IS NOT NULL
+GROUP BY competition_open_since_year
+ORDER BY competition_open_since_year DESC;
+```
+
+- 6. 🔄 ¿Qué patrones existen en Promo2 (Meses de renovación)?
+
+```sql
+SELECT 
+    promo_month, 
+    COUNT(*) as frequency
+FROM "retail_grupo1"."curated_dim_store"
+CROSS JOIN UNNEST(promo_interval_array) AS t(promo_month)
+GROUP BY promo_month
+ORDER BY frequency DESC;
+```
+
+- 7. 💰 ¿Cuál es el total de ventas pronosticadas?
+
+```sql
+SELECT 
+    SUM(sales) as total_forecasted_sales
+FROM "retail_grupo1"."curated_fact_sales_forecast";
+```
+
+- 8. 📊 ¿Cómo se distribuyen las ventas (outliers)?
+
+```sql
+SELECT 
+    MIN(sales) as min_sales,
+    approx_percentile(sales, 0.25) as p25,
+    approx_percentile(sales, 0.50) as median_p50,
+    approx_percentile(sales, 0.75) as p75,
+    approx_percentile(sales, 0.95) as p95_outlier_threshold,
+    MAX(sales) as max_sales
+FROM "retail_grupo1"."curated_fact_sales_forecast";
+```
+
+---
+
 ## 🛠️ Tecnologías Utilizadas
 
 | Tecnología | Versión/Tipo | Uso |
@@ -288,6 +386,7 @@ raw/
 | **AWS S3** | Object Storage | Data Lake (Raw & Curated) |
 | **AWS Glue** | Serverless | ETL, Catalogación, Orquestación |
 | **PySpark** | 3.x | Procesamiento distribuido |
+| **Athena** | Presto-based | Motor de consultas SQL serverless |
 | **Parquet** | Columnar | Formato optimizado para analytics |
 | **Python** | 3.x | Scripting de transformaciones |
 
