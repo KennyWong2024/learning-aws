@@ -210,6 +210,10 @@ graph TD
     F --> G[✅ Pipeline Completo]
 ```
 
+#### Captura con ejecución exitosa
+
+![alt text](../images/project_retail_01.png)
+
 #### Triggers Configurados
 
 | Trigger | Condición | Siguiente Paso |
@@ -221,10 +225,6 @@ graph TD
 | ✅ Trigger Final | Job 3 = SUCCEEDED | Crawler Curated |
 
 ---
-
-#### Captura con ejecución exitosa
-
-![alt text](../images/project_retail_01.png)
 
 ## 🚧 Retos y Soluciones
 
