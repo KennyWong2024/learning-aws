@@ -284,7 +284,7 @@ raw/
 ## 📈 Análisis de Negocio
 Una vez completado el pipeline ETL, los datos procesados están disponibles para responder preguntas estratégicas de negocio mediante consultas SQL en AWS Athena.
 
-- 1. 🏪 ¿Cuántas tiendas hay por StoreType y Assortment?
+1. 🏪 ¿Cuántas tiendas hay por StoreType y Assortment?
 
 ```sql
 SELECT 
@@ -296,7 +296,7 @@ GROUP BY store_type, assortment
 ORDER BY store_type, assortment;
 ```
 
-- 2. 🎯 ¿Qué porcentaje de tiendas participa en Promo2?
+2. 🎯 ¿Qué porcentaje de tiendas participa en Promo2?
 
 ```sql
 SELECT 
@@ -306,7 +306,7 @@ SELECT
 FROM "retail_grupo1"."curated_dim_store";
 ```
 
-- 3. 📍 ¿Cuál es la distancia promedio a la competencia por StoreType?
+3. 📍 ¿Cuál es la distancia promedio a la competencia por StoreType?
 
 ```sql
 SELECT 
@@ -318,7 +318,7 @@ GROUP BY store_type
 ORDER BY avg_distance_meters ASC;
 ```
 
-- 4. ⚠️ ¿Qué tiendas enfrentan mayor presión competitiva?
+4. ⚠️ ¿Qué tiendas enfrentan mayor presión competitiva?
 
 ```sql
 SELECT 
@@ -332,7 +332,7 @@ ORDER BY competition_distance ASC
 LIMIT 20;
 ```
 
-- 5. 📅 ¿Cómo se distribuyen las aperturas de competencia por año?
+5. 📅 ¿Cómo se distribuyen las aperturas de competencia por año?
 
 ```sql
 SELECT 
@@ -344,7 +344,7 @@ GROUP BY competition_open_since_year
 ORDER BY competition_open_since_year DESC;
 ```
 
-- 6. 🔄 ¿Qué patrones existen en Promo2 (Meses de renovación)?
+6. 🔄 ¿Qué patrones existen en Promo2 (Meses de renovación)?
 
 ```sql
 SELECT 
@@ -356,7 +356,7 @@ GROUP BY promo_month
 ORDER BY frequency DESC;
 ```
 
-- 7. 💰 ¿Cuál es el total de ventas pronosticadas?
+7. 💰 ¿Cuál es el total de ventas pronosticadas?
 
 ```sql
 SELECT 
@@ -364,7 +364,7 @@ SELECT
 FROM "retail_grupo1"."curated_fact_sales_forecast";
 ```
 
-- 8. 📊 ¿Cómo se distribuyen las ventas (outliers)?
+8. 📊 ¿Cómo se distribuyen las ventas (outliers)?
 
 ```sql
 SELECT 
@@ -376,6 +376,8 @@ SELECT
     MAX(sales) as max_sales
 FROM "retail_grupo1"."curated_fact_sales_forecast";
 ```
+
+9. 💡 ¿Qué decisiones de negocio se podrían tomar con este análisis?
 
 ---
 
