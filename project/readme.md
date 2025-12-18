@@ -186,9 +186,9 @@ df.write.mode("overwrite").parquet("s3://uh-retail-grupo1/curated/store/")
 - **Entrada:** `s3://uh-retail-grupo1/curated/`
 - **Función:** Registra las tablas Parquet procesadas en el catálogo
 - **Tablas Finales Disponibles:**
-  - ✅ `curated_dim_store` (Dimensión lista para análisis)
-  - ✅ `curated_fact_sales_forecast` (Hechos listos para análisis)
-  - ✅ `curated_store` (Tabla intermedia)
+  - ✅ `dim_store` (Dimensión lista para análisis)
+  - ✅ `fact_sales_forecast` (Hechos listos para análisis)
+  - ✅ `curated_store` (Tabla intermedia - No catalogada en Glue, usada solo como Staging)
 
 ---
 
@@ -291,7 +291,7 @@ SELECT
     store_type, 
     assortment, 
     COUNT(store_id) as total_stores
-FROM "retail_grupo1"."curated_dim_store"
+FROM "retail_grupo1"."dim_store"
 GROUP BY store_type, assortment
 ORDER BY store_type, assortment;
 ```
@@ -303,7 +303,7 @@ SELECT
     COUNT(store_id) as total_stores,
     SUM(promo2) as stores_with_promo2,
     (CAST(SUM(promo2) AS DOUBLE) / COUNT(store_id)) * 100.0 as pct_participation
-FROM "retail_grupo1"."curated_dim_store";
+FROM "retail_grupo1"."dim_store";
 ```
 
 3. 📍 ¿Cuál es la distancia promedio a la competencia por StoreType?
@@ -312,7 +312,7 @@ FROM "retail_grupo1"."curated_dim_store";
 SELECT 
     store_type,
     ROUND(AVG(competition_distance), 2) as avg_distance_meters
-FROM "retail_grupo1"."curated_dim_store"
+FROM "retail_grupo1"."dim_store"
 WHERE competition_distance IS NOT NULL
 GROUP BY store_type
 ORDER BY avg_distance_meters ASC;
@@ -325,7 +325,7 @@ SELECT
     store_id, 
     store_type, 
     competition_distance
-FROM "retail_grupo1"."curated_dim_store"
+FROM "retail_grupo1"."dim_store"
 WHERE competition_distance IS NOT NULL 
   AND competition_distance > 0
 ORDER BY competition_distance ASC
@@ -338,7 +338,7 @@ LIMIT 20;
 SELECT 
     competition_open_since_year, 
     COUNT(store_id) as new_competitors_count
-FROM "retail_grupo1"."curated_dim_store"
+FROM "retail_grupo1"."dim_store"
 WHERE competition_open_since_year IS NOT NULL
 GROUP BY competition_open_since_year
 ORDER BY competition_open_since_year DESC;
@@ -350,7 +350,7 @@ ORDER BY competition_open_since_year DESC;
 SELECT 
     promo_month, 
     COUNT(*) as frequency
-FROM "retail_grupo1"."curated_dim_store"
+FROM "retail_grupo1"."dim_store"
 CROSS JOIN UNNEST(promo_interval_array) AS t(promo_month)
 GROUP BY promo_month
 ORDER BY frequency DESC;
@@ -361,7 +361,7 @@ ORDER BY frequency DESC;
 ```sql
 SELECT 
     SUM(sales) as total_forecasted_sales
-FROM "retail_grupo1"."curated_fact_sales_forecast";
+FROM "retail_grupo1"."fact_sales_forecast";
 ```
 
 8. 📊 ¿Cómo se distribuyen las ventas (outliers)?
@@ -374,7 +374,7 @@ SELECT
     approx_percentile(sales, 0.75) as p75,
     approx_percentile(sales, 0.95) as p95_outlier_threshold,
     MAX(sales) as max_sales
-FROM "retail_grupo1"."curated_fact_sales_forecast";
+FROM "retail_grupo1"."fact_sales_forecast";
 ```
 
 9. 💡 ¿Qué decisiones de negocio se podrían tomar con este análisis?
