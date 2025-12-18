@@ -14,14 +14,13 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args['JOB_NAME'], args)
 
-## Lectura de datos
+## Lectura de datos 
 path_input = "s3://uh-retail-grupo1/curated/store/"
 df_store = spark.read.parquet(path_input)
 
-## Columnas derivadas (Transformaciones)
-# A) competition_open_year_month (YYYY-MM)
-# Usamos lpad para asegurar que el mes 9 se convierta en '09'
-# Solo lo calculamos si tenemos ambos datos (Año y Mes), si no, queda Null.
+## Columnas derivadas 
+
+# competition_open_year_month (YYYY-MM)
 df_transformed = df_store.withColumn("competition_open_year_month", 
     when(
         col("competition_open_since_year").isNotNull() & col("competition_open_since_month").isNotNull(),
@@ -33,8 +32,7 @@ df_transformed = df_store.withColumn("competition_open_year_month",
     ).otherwise(None)
 )
 
-# B) promo2_start_year_week (YYYY-WW)
-# Similar al anterior, aseguramos que la semana tenga 2 dígitos.
+# promo2_start_year_week (YYYY-WW)
 df_transformed = df_transformed.withColumn("promo2_start_year_week", 
     when(
         col("promo2_since_year").isNotNull() & col("promo2_since_week").isNotNull(),
@@ -46,16 +44,40 @@ df_transformed = df_transformed.withColumn("promo2_start_year_week",
     ).otherwise(None)
 )
 
-# C) promo_interval_array (String -> Array)
-# Convertimos "Jan,Apr,Jul,Oct" en un array real ["Jan", "Apr", "Jul", "Oct"]
-# La función split hace esto automáticamente. Si es nulo, devuelve nulo.
+# promo_interval_array (String -> Array)
 df_transformed = df_transformed.withColumn("promo_interval_array", 
     split(col("promo_interval"), ",")
 )
 
+## Maping de datos
+df_final = df_transformed.select(
+    col("store_id"),
+    col("store_type"),
+    col("assortment"),
+    col("competition_distance"),
+    
+    # Columnas originales de Competition
+    col("competition_open_since_month"),
+    col("competition_open_since_year"),
+    
+    # Nueva columna derivada Competition
+    col("competition_open_year_month"), 
+    
+    # Columnas originales de Promo2
+    col("promo2"),
+    col("promo2_since_week"),
+    col("promo2_since_year"),
+    
+    # Nueva columna derivada Promo2
+    col("promo2_start_year_week"), 
+
+    # Intervalos
+    col("promo_interval"),     # Original STRING
+    col("promo_interval_array") # Arreglo
+)
+
 ## Carga de datos
 path_output = "s3://uh-retail-grupo1/curated/dim_store/"
-
-df_transformed.write.mode("overwrite").parquet(path_output)
+df_final.write.mode("overwrite").parquet(path_output)
 
 job.commit()
