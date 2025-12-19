@@ -292,8 +292,8 @@ SELECT
     assortment, 
     COUNT(store_id) as total_stores
 FROM "retail_grupo1"."dim_store"
-GROUP BY store_type, assortment
-ORDER BY store_type, assortment;
+GROUP BY 1, 2
+ORDER BY 1, 2;
 ```
 
 2. 🎯 ¿Qué porcentaje de tiendas participa en Promo2?
@@ -302,7 +302,7 @@ ORDER BY store_type, assortment;
 SELECT 
     COUNT(store_id) as total_stores,
     SUM(promo2) as stores_with_promo2,
-    (CAST(SUM(promo2) AS DOUBLE) / COUNT(store_id)) * 100.0 as pct_participation
+    ROUND((CAST(SUM(promo2) AS DOUBLE) / COUNT(store_id)) * 100.0, 2) AS pct_participation
 FROM "retail_grupo1"."dim_store";
 ```
 
@@ -311,11 +311,11 @@ FROM "retail_grupo1"."dim_store";
 ```sql
 SELECT 
     store_type,
-    ROUND(AVG(competition_distance), 2) as avg_distance_meters
+    ROUND(AVG(competition_distance), 2) AS avg_distance
 FROM "retail_grupo1"."dim_store"
 WHERE competition_distance IS NOT NULL
-GROUP BY store_type
-ORDER BY avg_distance_meters ASC;
+GROUP BY 1
+ORDER BY 2 ASC;
 ```
 
 4. ⚠️ ¿Qué tiendas enfrentan mayor presión competitiva?
@@ -328,8 +328,7 @@ SELECT
 FROM "retail_grupo1"."dim_store"
 WHERE competition_distance IS NOT NULL 
   AND competition_distance > 0
-ORDER BY competition_distance ASC
-LIMIT 20;
+ORDER BY 3 ASC;
 ```
 
 5. 📅 ¿Cómo se distribuyen las aperturas de competencia por año?
@@ -340,8 +339,8 @@ SELECT
     COUNT(store_id) as new_competitors_count
 FROM "retail_grupo1"."dim_store"
 WHERE competition_open_since_year IS NOT NULL
-GROUP BY competition_open_since_year
-ORDER BY competition_open_since_year DESC;
+GROUP BY 1
+ORDER BY 1 DESC;
 ```
 
 6. 🔄 ¿Qué patrones existen en Promo2 (Meses de renovación)?
@@ -349,11 +348,11 @@ ORDER BY competition_open_since_year DESC;
 ```sql
 SELECT 
     promo_month, 
-    COUNT(*) as frequency
+    COUNT(*) AS frequency
 FROM "retail_grupo1"."dim_store"
 CROSS JOIN UNNEST(promo_interval_array) AS t(promo_month)
-GROUP BY promo_month
-ORDER BY frequency DESC;
+GROUP BY 1
+ORDER BY 2 DESC;
 ```
 
 7. 💰 ¿Cuál es el total de ventas pronosticadas?
@@ -368,12 +367,12 @@ FROM "retail_grupo1"."fact_sales_forecast";
 
 ```sql
 SELECT 
-    MIN(sales) as min_sales,
-    approx_percentile(sales, 0.25) as p25,
-    approx_percentile(sales, 0.50) as median_p50,
-    approx_percentile(sales, 0.75) as p75,
-    approx_percentile(sales, 0.95) as p95_outlier_threshold,
-    MAX(sales) as max_sales
+    MIN(sales) AS min_sales,
+    approx_percentile(sales, 0.25) AS p25,
+    approx_percentile(sales, 0.50) AS median_p50,
+    approx_percentile(sales, 0.75) AS p75,
+    approx_percentile(sales, 0.95) AS p95_outlier_threshold,
+    MAX(sales) AS max_sales
 FROM "retail_grupo1"."fact_sales_forecast";
 ```
 
